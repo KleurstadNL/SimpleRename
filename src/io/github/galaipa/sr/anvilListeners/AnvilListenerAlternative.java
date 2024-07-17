@@ -28,7 +28,9 @@ public class AnvilListenerAlternative implements Listener {
             HumanEntity p = event.getWhoClicked();
             if (inv.getType().equals(InventoryType.ANVIL) && event.getSlotType() == InventoryType.SlotType.RESULT) {
                 ItemStack item = event.getCurrentItem();
+                assert item != null;
                 ItemMeta meta = item.getItemMeta();
+                assert meta != null;
                 String name = meta.getDisplayName();
                 if (plugin.checkEverything((Player) p, name, null, 1, item)) {
                     name = ChatColor.translateAlternateColorCodes('&', name);
@@ -40,9 +42,6 @@ public class AnvilListenerAlternative implements Listener {
                 }
 
             }
-        } catch (NullPointerException e) {
-
-        }
-
+        } catch (NullPointerException ignored) {}
     }
 }

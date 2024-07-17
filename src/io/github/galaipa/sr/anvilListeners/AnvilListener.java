@@ -14,17 +14,20 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import io.github.galaipa.sr.Methods;
 import io.github.galaipa.sr.SimpleRename;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class AnvilListener implements Listener {
 
-    private static char COLOR_CODE = '§';
+    private static final char COLOR_CODE = '§';
     SimpleRename plugin;
 
     public AnvilListener(SimpleRename plugin) {
         this.plugin = plugin;
     }
 
-    public static String recoverColorCodes(String newName, String oldName) {
+    public static @NotNull String recoverColorCodes(String newName, @NotNull String oldName) {
         int iOld = 1;
         int iNew = 0;
         while (iOld < oldName.length() && iNew < newName.length()
@@ -41,7 +44,7 @@ public class AnvilListener implements Listener {
     }
 
     public String getDisplayName(ItemStack item) {
-        if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+        if (item != null && item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasDisplayName()) {
             return item.getItemMeta().getDisplayName();
         }
         return "";
@@ -52,7 +55,7 @@ public class AnvilListener implements Listener {
     }
 
     @EventHandler
-    public void anvilListener(PrepareAnvilEvent event) {
+    public void anvilListener(@NotNull PrepareAnvilEvent event) {
         AnvilInventory inv = event.getInventory();
         if (event.getViewers().isEmpty()) {
             return;
@@ -78,7 +81,7 @@ public class AnvilListener implements Listener {
     }
 
     @EventHandler
-    public void anvilListenerGetResult(InventoryClickEvent event) {
+    public void anvilListenerGetResult(@NotNull InventoryClickEvent event) {
         Inventory inv = event.getInventory();
         HumanEntity p = event.getWhoClicked();
         if (!(checkPreConditions(inv, p))) {
@@ -102,16 +105,12 @@ public class AnvilListener implements Listener {
     /**
      * Checks whether or not an anvil inventory is actually connected with a real
      * world anvil
-     * 
-     * @param anvilInventory
-     * @return
+     *
      */
-    public boolean isRealAnvil(AnvilInventory anvilInventory) {
-        if (anvilInventory.getLocation().getBlockX() == 0 && anvilInventory.getLocation().getBlockY() == 0
+    public boolean isRealAnvil(@NotNull AnvilInventory anvilInventory) {
+        if (Objects.requireNonNull(anvilInventory.getLocation()).getBlockX() == 0 && anvilInventory.getLocation().getBlockY() == 0
                 && anvilInventory.getLocation().getBlockZ() == 0) {
-            if (anvilInventory.getLocation().getBlock().getType() != Material.ANVIL) {
-                return false;
-            }
+            return anvilInventory.getLocation().getBlock().getType() == Material.ANVIL;
         }
         return true;
     }

@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class Utils {
 
@@ -15,11 +16,11 @@ public class Utils {
     static final String MAGIC_CODE_REGEX = ".*[§&][kK].*";
     static final String ALL_CODE_REGEX = "[§&][0-9a-f-A-Fk-rK-R]";
 
-    public static String removeColorCodes(String string) {
+    public static @NotNull String removeColorCodes(String string) {
         return ChatColor.stripColor(string).replaceAll(ALL_CODE_REGEX, "");
     }
 
-    public static String formatString(String string, boolean overrideDefaultFormat) {
+    public static @NotNull String formatString(String string, boolean overrideDefaultFormat) {
         // The &r is added at the beginning to remove default formatting
         if (!overrideDefaultFormat || string.startsWith("&r")) {
             return ChatColor.translateAlternateColorCodes('&', string);
@@ -40,7 +41,7 @@ public class Utils {
         }
     }
 
-    public static boolean checkName(List<String> blackList, String message) {
+    public static boolean checkName(List<String> blackList, @NotNull String message) {
         List<String> blackListLowerCase = listToLowerCase(blackList);
         for (String word : message.split(" ")) {
             word = word.toLowerCase();
@@ -52,7 +53,7 @@ public class Utils {
         return true;
     }
 
-    public static boolean checkItem(List<String> blackList, Player p, ItemStack item) {
+    public static boolean checkItem(List<String> blackList, @NotNull Player p, ItemStack item) {
         if (p.hasPermission("sr.blacklist"))
             return true;
         if (p.hasPermission("sr.blacklist." + item.getType().toString()))
@@ -65,7 +66,7 @@ public class Utils {
         return true;
     }
 
-    public static List<String> listToLowerCase(List<String> list) {
+    public static @NotNull List<String> listToLowerCase(@NotNull List<String> list) {
         List<String> newList = new ArrayList<>();
 
         for (String s : list) {
@@ -74,7 +75,7 @@ public class Utils {
         return newList;
     }
 
-    public static String extractArgs(int nondik, String[] args) {
+    public static @NotNull String extractArgs(int nondik, String @NotNull [] args) {
         StringBuilder sb = new StringBuilder();
         for (int i = nondik; i < args.length; i++) {
             sb.append(args[i]).append(" ");
@@ -101,7 +102,7 @@ public class Utils {
         return allArgs;
     }
 
-    protected static void setXP(Player p, int amount) {
+    protected static void setXP(@NotNull Player p, int amount) {
         p.setExp(0);
         p.setLevel(0);
         p.setTotalExperience(0);

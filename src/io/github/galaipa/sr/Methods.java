@@ -14,17 +14,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 
 public class Methods {
 
     // Rename
-    public static void setName(ItemStack item, String name, boolean overrideDefaultFormat) {
+    public static void setName(@NotNull ItemStack item, String name, boolean overrideDefaultFormat) {
         ItemMeta itemStackMeta = item.getItemMeta();
+        assert itemStackMeta != null;
         itemStackMeta.setDisplayName(Utils.formatString(name, overrideDefaultFormat));
         item.setItemMeta(itemStackMeta);
     }
 
-    private static List<String> multiLineLore(String lore, boolean overrideDefaultFormat) {
+    private static @NotNull List<String> multiLineLore(@NotNull String lore, boolean overrideDefaultFormat) {
         List<String> loreList = Arrays.asList(lore.split("\\\\n"));
         ListIterator<String> itr = loreList.listIterator();
         while (itr.hasNext()) {
@@ -34,17 +36,18 @@ public class Methods {
     }
 
     // Set lore
-    public static void setLore(ItemStack itemStack, String name, boolean overrideDefaultFormat) {
+    public static void setLore(@NotNull ItemStack itemStack, String name, boolean overrideDefaultFormat) {
         String lore = Utils.formatString(name, overrideDefaultFormat);
         List<String> loreList = multiLineLore(lore, overrideDefaultFormat);
         ItemMeta itemStackMeta = itemStack.getItemMeta();
+        assert itemStackMeta != null;
         itemStackMeta.setLore(loreList);
         itemStack.setItemMeta(itemStackMeta);
     }
 
     // Add a new lore line
-    public static void addLore(ItemStack itemStack, String loreString, boolean overrideDefaultFormat) {
-        List<String> lore = itemStack.getItemMeta().getLore();
+    public static void addLore(@NotNull ItemStack itemStack, String loreString, boolean overrideDefaultFormat) {
+        List<String> lore = Objects.requireNonNull(itemStack.getItemMeta()).getLore();
 
         if (lore == null) {
             setLore(itemStack, loreString, overrideDefaultFormat);
@@ -58,30 +61,34 @@ public class Methods {
     }
 
     // Set book author
-    public static void setBookAuthor(ItemStack book, String name) {
+    public static void setBookAuthor(@NotNull ItemStack book, String name) {
         BookMeta meta = (BookMeta) book.getItemMeta();
+        assert meta != null;
         meta.setAuthor(name);
         book.setItemMeta(meta);
     }
 
     // Set book title
-    public static void setBookTitle(ItemStack book, String name) {
+    public static void setBookTitle(@NotNull ItemStack book, String name) {
         BookMeta meta = (BookMeta) book.getItemMeta();
+        assert meta != null;
         meta.setDisplayName(null);
         meta.setTitle(name);
         book.setItemMeta(meta);
     }
 
     // Unsign book
-    public static ItemStack unSignBook(ItemStack book) {
+    public static @NotNull ItemStack unSignBook(@NotNull ItemStack book) {
         BookMeta oldMeta = (BookMeta) book.getItemMeta();
         ItemStack unsigned;
         try {
             unsigned = new ItemStack(Material.WRITABLE_BOOK, 1);
         } catch (NoSuchFieldError e) {
-            unsigned = new ItemStack(Material.matchMaterial("BOOK_AND_QUILL"), 1);
+            unsigned = new ItemStack(Objects.requireNonNull(Material.matchMaterial("BOOK_AND_QUILL")), 1);
         }
         BookMeta newMeta = (BookMeta) unsigned.getItemMeta();
+        assert newMeta != null;
+        assert oldMeta != null;
         newMeta.setPages(oldMeta.getPages());
         unsigned.setItemMeta(newMeta);
         return unsigned;
@@ -89,28 +96,25 @@ public class Methods {
     }
 
     // Clear Meta
-    public static void clearItem(ItemStack item) {
+    public static void clearItem(@NotNull ItemStack item) {
         ItemMeta itemStackMeta = item.getItemMeta();
+        assert itemStackMeta != null;
         itemStackMeta.setDisplayName(null);
         itemStackMeta.setLore(null);
         item.setItemMeta(itemStackMeta);
     }
 
     // Duplicate item
-    public static void duplicateItem(ItemStack item, int amount) {
+    public static void duplicateItem(@NotNull ItemStack item, int amount) {
         int amountInHand = item.getAmount();
         int result = amountInHand * amount;
         item.setAmount(result);
     }
 
     // Get specific amount of an item
-    public static void getAmountItem(ItemStack item, int amount) {
+    public static void getAmountItem(@NotNull ItemStack item, int amount) {
         int max = item.getMaxStackSize();
-        if (max < amount) {
-            item.setAmount(max);
-        } else {
-            item.setAmount(amount);
-        }
+        item.setAmount(Math.min(max, amount));
     }
 
     // Make item unbreakable
@@ -130,6 +134,7 @@ public class Methods {
         } else {
             // New Bukkit API Method
             ItemMeta itemStackMeta = item.getItemMeta();
+            assert itemStackMeta != null;
             itemStackMeta.setUnbreakable(unbreakable);
             item.setItemMeta(itemStackMeta);
         }
@@ -139,15 +144,15 @@ public class Methods {
     public static Map<String, ItemMeta> copy = new HashMap<>();
 
     // Copy
-    public static void copyMeta(Player player) {
-        ItemStack item = player.getItemInHand();
+    public static void copyMeta(@NotNull Player player) {
+        ItemStack item = player.getInventory().getItemInMainHand();
         ItemMeta meta = item.getItemMeta();
         copy.put(player.getName(), meta);
     }
 
     // Paste
-    public static void pasteMeta(Player player) {
-        ItemStack item1 = player.getItemInHand();
+    public static void pasteMeta(@NotNull Player player) {
+        ItemStack item1 = player.getInventory().getItemInMainHand();
         int slot = player.getInventory().getHeldItemSlot();
         ItemMeta metaData = copy.get(player.getName());
         item1.setItemMeta(metaData);
@@ -178,34 +183,37 @@ public class Methods {
     }
 
     // Get Skull
-    public static ItemStack getSkull(String owner) {
+    public static @NotNull ItemStack getSkull(String owner) {
         ItemStack skull = null;
         try {
             skull = new ItemStack(Material.PLAYER_HEAD, 1);
         } catch (NoSuchFieldError e) {
-            skull = new ItemStack(Material.matchMaterial("SKULL_ITEM"), 1);
+            skull = new ItemStack(Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")), 1);
         }
         skull.setDurability((short) 3);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
+        assert meta != null;
         meta.setOwner(owner);
         skull.setItemMeta(meta);
         return skull;
     }
 
-    public static void glowItem(ItemStack item) {
+    public static void glowItem(@NotNull ItemStack item) {
         ItemMeta itemStackMeta = item.getItemMeta();
+        assert itemStackMeta != null;
         itemStackMeta.addEnchant(Enchantment.LURE, 0, true);
         itemStackMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(itemStackMeta);
     }
 
-    public static void unGlowItem(ItemStack item) {
+    public static void unGlowItem(@NotNull ItemStack item) {
         ItemMeta itemStackMeta = item.getItemMeta();
+        assert itemStackMeta != null;
         itemStackMeta.removeEnchant(Enchantment.LURE);
         item.setItemMeta(itemStackMeta);
     }
 
-    public static void hideFlags(ItemStack item) {
+    public static void hideFlags(@NotNull ItemStack item) {
         ItemMeta itemStackMeta = item.getItemMeta();
         itemStackMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         itemStackMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
@@ -213,18 +221,21 @@ public class Methods {
         item.setItemMeta(itemStackMeta);
     }
 
-    public static void showFlags(ItemStack item) {
+    public static void showFlags(@NotNull ItemStack item) {
         ItemMeta itemStackMeta = item.getItemMeta();
+        assert itemStackMeta != null;
         itemStackMeta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
         itemStackMeta.removeItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         itemStackMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
         item.setItemMeta(itemStackMeta);
     }
 
-    public static void removeLore(ItemStack item, int n) {
+    public static void removeLore(@NotNull ItemStack item, int n) {
         ItemMeta itemStackMeta = item.getItemMeta();
+        assert itemStackMeta != null;
         if (itemStackMeta.hasLore() && (n != -1)) {
             List<String> list = itemStackMeta.getLore();
+            assert list != null;
             if (list.size() >= (n + 1)) {
                 list.remove(n);
                 itemStackMeta.setLore(list);

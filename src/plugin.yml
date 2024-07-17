@@ -5,6 +5,7 @@ api-version: 1.13
 authors: [Galaipa, EnergizerBEAST1, ScarabCoder]
 softdepend: [ProtocolLib]
 description: Simple plugin to rename and relore items
+folia-supported: true
 commands:
   rename:
     description: Name command for items
